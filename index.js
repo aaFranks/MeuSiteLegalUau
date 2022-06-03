@@ -1,45 +1,72 @@
 const imagem = document.querySelector("#bananaman");
 
 const delayInMilliseconds = 50;
-const velocidade = 10;
+const velocidade = 0.05;
 const tamanho = 100;
 const tamanho2 = 50;
+
+let BananasCount = 0;
+
+let SrcImage = "./bananaman.png";
 
 let MouseX = 0, MouseY = 0;
 let LastX = 0, LastY = 0;
 
-var pontos = 0;
+let pontos = 0;
 
 imagem.style.width = tamanho + 'px';
 imagem.style.height = tamanho + 'px';
 
-// Create food
-setInterval(function() {
-    div = document.querySelector("div");
-    var bound = div.getBoundingClientRect();
-    var RamdonX = Math.floor((Math.random() * bound.height));
-    var RamdonY = Math.floor(Math.random() * bound.width);
+updateScreen();
+SpawnBanana();
 
-    var img = document.createElement('img');
-    img.src = "./banana.png";
-    img.classList.add('fruta');
-    img.style.width = tamanho2 + 'px';
-    img.style.height = tamanho2 + 'px';
-    
-    img.style.left = RamdonX.toString() + 'px';
-    img.style.top = RamdonY.toString() + 'px';
+function SpawnBanana () {
+    if (BananasCount == 0) {
+        div = document.getElementsByTagName("body")[0];
 
-    img.onclick = () => {
-        pontos += 1;
-        img.outerHTML = '';
-        updateScreen();
+        const boundies = div.getBoundingClientRect();
+
+        let H = boundies.height - tamanho2;
+        let W = boundies.width - tamanho2;
+        let RamdonX = Math.floor((Math.random() * W));
+        let RamdonY = Math.floor((Math.random() * H));
+        
+        console.log(H);
+        console.log(W);
+        console.log("------");
+        console.log(RamdonX);
+        console.log(RamdonY);
+        console.log("------");
+
+        let img = document.createElement('img');
+        img.src = "./banana.png";
+        img.classList.add('fruta');
+        img.style.width = tamanho2 + 'px';
+        img.style.height = tamanho2 + 'px';
+        
+        img.style.left = RamdonX.toString() + 'px';
+        img.style.top = RamdonY.toString() + 'px';
+
+        img.onclick = () => {
+            pontos += 1;
+            img.outerHTML = '';
+            BananasCount--;
+            updateScreen();
+            SpawnBanana();
+        }
+        
+        div.appendChild(img);
+        BananasCount++;
     }
-    
-    div.appendChild(img);
-}, 5 * 1000);
+}
 
 function updateScreen() {
     document.getElementById('ScoreShow').innerText = 'Pontos: ' + pontos;
+    let result = 1 - (velocidade * 15);
+    if (pontos < 15) {
+        result = 1 - (velocidade * pontos);
+    }
+    imagem.style.transition = "all " + result + "s linear";
 }
 
 setTimeout(() => {
@@ -71,4 +98,15 @@ document.addEventListener('mousemove', (event) => {
         imagem.style.top = event.clientY - (tamanho / 2) + 'px';
         MouseY = event.clientY;
     }
+
+    if (LastX - MouseX > 0) {
+        SrcImage = "./bananaman2.png";
+    } else if (LastX - MouseX < 0) {
+        SrcImage = "./bananaman.png";
+    }
+
+    imagem.src = SrcImage;
+
+    LastX = MouseX;
+    LastY = MouseY;
 });
